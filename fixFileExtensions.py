@@ -3,6 +3,8 @@ import subprocess
 import json
 import sys
 
+# Uses FFProbe to identify contained file type and renames the file with correct extension.
+
 def get_format_details(file_path):
     try:
         result = subprocess.run(

@@ -3,6 +3,8 @@ import sys
 from pydub import AudioSegment
 from pydub.silence import detect_nonsilent
 
+# Trims silence from the beginning and end of audio files.
+
 def trim_silence(audio, silence_thresh=-50, chunk_size=10):
     """Trim silence from the beginning and end of an audio segment."""
     non_silence = detect_nonsilent(audio, min_silence_len=chunk_size, silence_thresh=silence_thresh)
@@ -16,19 +18,24 @@ def process_audio_files(input_folder, log_file, silence_thresh=-50, chunk_size=1
     """Process all audio files in the input folder and overwrite them with trimmed versions."""
     with open(log_file, 'a') as log:
         for filename in os.listdir(input_folder):
-            audio_path = os.path.join(input_folder, filename)
-            audio = AudioSegment.from_file(audio_path)
-            trimmed_audio, start_trim, end_trim = trim_silence(audio, silence_thresh, chunk_size)
-            
-            # Log the details
-            log.write(f"{filename}\n")
-            log.write(f"Total Length: {len(audio)} ms\n")
-            log.write(f"Trim at Start: {start_trim} ms\n")
-            log.write(f"Trim at End: {end_trim} ms\n\n")
-            
-            # Overwrite the original file with the trimmed audio
-            file_format = filename.split('.')[-1]
-            trimmed_audio.export(audio_path, format=file_format)
+            file_path = os.path.join(input_folder, filename)
+            try:
+                print(f"Processing {filename}...")
+                audio = AudioSegment.from_file(file_path)
+                trimmed_audio, start_trim, end_trim = trim_silence(audio, silence_thresh, chunk_size)
+
+                # Log the details
+                log.write(f"{filename}\n")
+                log.write(f"Total Length: {len(audio)} ms\n")
+                log.write(f"Trim at Start: {start_trim} ms\n")
+                log.write(f"Trim at End: {end_trim} ms\n\n")
+
+                # Overwrite the original file with the trimmed audio
+                file_format = filename.split('.')[-1]
+                trimmed_audio.export(file_path, format=file_format)
+            except Exception as e:
+                log.write(f"Error processing file {filename}: {str(e)}\n")
+                print(f"Skipping: {filename}. Error processing file.")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

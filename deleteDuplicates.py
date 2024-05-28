@@ -4,6 +4,8 @@ import hashlib
 from pydub import AudioSegment
 from tqdm import tqdm
 
+# Identifies duplicates and deletes a copy.
+
 def write_log(log_file, message):
     with open(log_file, 'a') as f:
         f.write(f"{message}\n")

@@ -1,8 +1,11 @@
 # Ignore credentials folder
 credentials/
 
-# Ignore hrv-audio-recs-content folder
+# Ignore hrv-audio-recs folder
 hrv-audio-recs/
+
+# Ignore extract speech features folder
+speechFeatures/
 
 # Ignore lookup.csv file
 lookup.csv

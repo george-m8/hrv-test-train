@@ -18,19 +18,20 @@ I am currently working on further clean up scripts:
     - Should be inserted to syncS3.sh before "cleanUpAudioDir.py" instruction.
 
 ## To do
-- [ ] Finalise convertToPCM.py script
-- [ ] Finalise and run trim trimSilence.py script
+- [x] Finalise convertToPCM.py script
+- [x] Finalise and run trim trimSilence.py script
 - [ ] Delete audio files that do not appear on lookup.csv
 - [ ] Delete lines from lookup.csv that do not appear as audio files.
 - [ ] Noise reduce audio
 - [ ] Identify numerical data types to extract from audio files (speech features)
     - [ ] Create modular script for this:
-       - [ ] Iterate through folder
-       - [ ] Extract metric
-       - [ ] Save to appropriate folder as .npy array file.
+       - [x] Iterate through folder
+       - [x] Extract metric
+       - [x] Save to appropriate folder as .npy array file.
+       - [ ] I think there's further scope to modularise this, for example: Can we just write a script that will process the audio and send back signal and sample rate. If this is used multiple times this will be more slick.
    - [ ] Potential extractions:
        - [ ] DFA2
-       - [ ] HFD
+       - [x] HFD
        - [ ] Other fractals
        - [ ] MFCC with varying parameters
 - [ ] Create script to compile ground truth data with speech features

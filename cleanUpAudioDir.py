@@ -3,6 +3,8 @@ import argparse
 from pydub import AudioSegment
 from pydub.utils import mediainfo
 
+# Identifies the audio files that are shorter than a given duration or have low volume and deletes these files.
+
 def is_low_volume(audio, threshold):
     """Check if the audio has very low volume."""
     return audio.dBFS < threshold
