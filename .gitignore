@@ -1,0 +1,38 @@
+# Ignore credentials folder
+credentials/
+
+# Ignore hrv-audio-recs-content folder
+hrv-audio-recs/
+
+# Ignore lookup.csv file
+lookup.csv
+
+# Ignore virtual environments
+venv/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore other system files
+Thumbs.db
+
+# Python specific ignores
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore temporary files
+*.tmp
+*.log
+
+# Ignore IDE specific settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore any other sensitive or temporary files as needed
