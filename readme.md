@@ -24,20 +24,20 @@ I am currently working on further clean up scripts:
 - [ ] Delete lines from lookup.csv that do not appear as audio files.
 - [ ] Noise reduce audio
 - [ ] Identify numerical data types to extract from audio files (speech features)
--    [ ] Create modular script for this:
--       [ ] Iterate through folder
--       [ ] Extract metric
--       [ ] Save to appropriate folder as .npy array file.
--   [ ] Potential extractions:
--       [ ] DFA2
--       [ ] HFD
--       [ ] Other fractals
--       [ ] MFCC with varying parameters
+    - [ ] Create modular script for this:
+       - [ ] Iterate through folder
+       - [ ] Extract metric
+       - [ ] Save to appropriate folder as .npy array file.
+   - [ ] Potential extractions:
+       - [ ] DFA2
+       - [ ] HFD
+       - [ ] Other fractals
+       - [ ] MFCC with varying parameters
 - [ ] Create script to compile ground truth data with speech features
--   [ ] Compile data from .npy or .csv speech feature files
--   [ ] Save compiled data to a cache as a .csv
--   [ ] Provide the user an option to ignore, force overwrite, use/not use cache.
+   - [ ] Compile data from .npy or .csv speech feature files
+   - [ ] Save compiled data to a cache as a .csv
+   - [ ] Provide the user an option to ignore, force overwrite, use/not use cache.
 - [ ] Split data for test and train
 - [ ] Test and train with various regression machines
--   [ ] Output result metrics to an evaluation .csv file.
+   - [ ] Output result metrics to an evaluation .csv file.
 - [ ] Introduce hyper parameter tuning to identify the best settings for machines.
