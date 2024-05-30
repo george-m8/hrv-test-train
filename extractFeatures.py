@@ -2,7 +2,7 @@ import os
 import sys
 
 from featureExtractScripts import higuchi_fd, calculate_dfa2, calculate_f0, calculate_jitter_shimmer
-from fileSaveScripts import save_numpy_file
+from fileSaveScripts import save_numpy_file, file_exists
 
 def save_file(data, file_name, *args):
     with open(log_file, 'a') as log:
@@ -21,6 +21,8 @@ def main(directory,log_file):
             log.write(f"The folder {directory} does not exist.\n")
             sys.exit(1)
 
+        saved_file_extension = "npy"
+
         for file_name in os.listdir(directory):
             if file_name.endswith('.wav'):
                 log.write(f"Processing {file_name}\n")
@@ -33,33 +35,36 @@ def main(directory,log_file):
                 
                 if extract_hfd:
                     feature_name = "higuchi_fd"
-                    kmax_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                    kmax_values = [2, 3, 5, 7, 10]
                     norm_values = [True, False]
-                
                     for kmax in kmax_values:
                         for norm in norm_values:
-                            extractedFeature = higuchi_fd(file_path, kmax, norm)
-                            save_file(extractedFeature, file_name, "speechFeatures", feature_name, f"kmax={kmax}", f"norm={norm}")
+                            if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, f"kmax={kmax}", f"norm={norm}"):
+                                extractedFeature = higuchi_fd(file_path, kmax, norm)
+                                save_file(extractedFeature, file_name, "speechFeatures", feature_name, f"kmax={kmax}", f"norm={norm}")
 
                 if extract_dfa2:
                     feature_name = "dfa2"
                     overlap_values = [True, False]
-                    order_values = [1, 2, 3]
+                    order_values = [1, 2]
 
                     for overlap in overlap_values:
                         for order in order_values:
-                            extractedFeature = calculate_dfa2(file_path, overlap=overlap, order=order)
-                            save_file(extractedFeature, file_name, "speechFeatures", feature_name, f"overlap={overlap}", f"order={order}")
-                
+                            if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, f"overlap={overlap}", f"order={order}"):
+                                extractedFeature = calculate_dfa2(file_path, overlap=overlap, order=order)
+                                save_file(extractedFeature, file_name, "speechFeatures", feature_name, f"overlap={overlap}", f"order={order}")
+                    
                 if extract_f0:
                     feature_name = "f0"
-                    extractedFeature = calculate_f0(file_path)
-                    save_file(extractedFeature, file_name, "speechFeatures", feature_name, "default")
+                    if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, "default"):
+                        extractedFeature = calculate_f0(file_path)
+                        save_file(extractedFeature, file_name, "speechFeatures", feature_name, "default")
 
                 if extract_jitter_shimmer:
                     feature_name = "jitter_shimmer"
-                    extractedFeature = calculate_jitter_shimmer(file_path)
-                    save_file(extractedFeature, file_name, "speechFeatures", feature_name, "default")
+                    if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, "default"):
+                        extractedFeature = calculate_jitter_shimmer(file_path)
+                        save_file(extractedFeature, file_name, "speechFeatures", feature_name, "default")
                 
 
         log.write(f"Feature extraction script completed.\n\n")

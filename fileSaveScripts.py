@@ -1,6 +1,20 @@
 import os
 import numpy as np
 
+def file_exists(file_name, extension, *args):
+    # Construct the directory path
+    directory_path = os.path.join(".", *args)
+    file_name = os.path.splitext(file_name)[0]
+    file_name = f"{file_name}.{extension}"
+    file_path = os.path.join(directory_path, file_name)
+    print (file_path)
+    
+    if os.path.exists(file_path):
+        print(f"File {file_path} already exists, skipping...")
+        return True
+    else:
+        return False
+
 def save_numpy_file(data, file_name, *args):
     """
     Save a numpy array to a specified directory structure.
