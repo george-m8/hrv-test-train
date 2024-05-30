@@ -1,8 +1,8 @@
 import numpy as np
 import librosa
 import nolds
-import parselmouth
-from parselmouth.praat import call
+
+from extract_praat_data import extract_praat_data, get_frequencies_per_frame, get_max_frequencies_per_frame
 
 def higuchi_fd(file_path, kmax, norm):
     """
@@ -160,3 +160,14 @@ def calculate_jitter_shimmer(file_path, **kwargs):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+    
+def get_f0_values(file_path):
+    try:
+        praat_json = extract_praat_data(file_path)
+        f0_values = get_frequencies_per_frame(praat_json)
+        return f0_values
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+

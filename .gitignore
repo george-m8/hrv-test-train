@@ -16,6 +16,9 @@ venv/
 # Ignore logs directory
 logs/
 
+# Ignore example data
+praat_example.json
+
 # Ignore macOS system files
 .DS_Store
 

@@ -116,10 +116,10 @@ if __name__ == "__main__":
         frames_data = extract_praat_data(wav_file_path)
         #print("Extracted data:\n", json.dumps(frames_data, indent=2))
 
-        save_json_file = False
+        save_json_file = True
 
     if save_json_file:
-        output_file_path = f"praat_{wav_file_path}.json"
+        output_file_path = f"praat_example.json"
         save_to_json(frames_data, output_file_path)
         print(f"Data saved to {output_file_path}")
 
