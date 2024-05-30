@@ -7,7 +7,6 @@ def file_exists(file_name, extension, *args):
     file_name = os.path.splitext(file_name)[0]
     file_name = f"{file_name}.{extension}"
     file_path = os.path.join(directory_path, file_name)
-    print (file_path)
     
     if os.path.exists(file_path):
         print(f"File {file_path} already exists, skipping...")

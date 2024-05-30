@@ -134,62 +134,6 @@ def calculate_dfa2(audio_file_path, **kwargs):
 import librosa
 import numpy as np
 
-def calculate_f0(audio_file_path, **kwargs):
-    try:
-        # Load the audio file with librosa (sample rate is auto-detected)
-        y, sr = librosa.load(audio_file_path)
-        
-        # Convert note names to frequencies if provided
-        fmin_note = kwargs.get('fmin', 'C2')
-        fmax_note = kwargs.get('fmax', 'C7')
-        fmin = librosa.note_to_hz(fmin_note) if isinstance(fmin_note, str) else fmin_note
-        fmax = librosa.note_to_hz(fmax_note) if isinstance(fmax_note, str) else fmax_note
-        
-        # Extract other keyword arguments for librosa.pyin
-        frame_length = kwargs.get('frame_length', 2048)
-        hop_length = kwargs.get('hop_length', frame_length // 4)  # Default to frame_length // 4 if not provided
-        win_length = kwargs.get('win_length', None)  # None means same as frame_length
-        n_thresholds = kwargs.get('n_thresholds', 100)
-        beta_parameters = kwargs.get('beta_parameters', (2, 18))
-        boltzmann_parameter = kwargs.get('boltzmann_parameter', 2)
-        resolution = kwargs.get('resolution', 0.01)
-        max_transition_rate = kwargs.get('max_transition_rate', 1.0)
-        switch_prob = kwargs.get('switch_prob', 0.01)
-        no_trough_prob = kwargs.get('no_trough_prob', 0.01)
-        fill_na = kwargs.get('fill_na', np.nan)
-        center = kwargs.get('center', True)
-        pad_mode = kwargs.get('pad_mode', 'constant')
-        
-        # Calculate the F0 using librosa's pitch detection method
-        f0, voiced_flag, voiced_probs = librosa.pyin(
-            y, 
-            fmin=fmin, 
-            fmax=fmax, 
-            sr=sr,
-            frame_length=frame_length, 
-            hop_length=hop_length, 
-            win_length=win_length, 
-            n_thresholds=n_thresholds,
-            beta_parameters=beta_parameters,
-            boltzmann_parameter=boltzmann_parameter,
-            resolution=resolution,
-            max_transition_rate=max_transition_rate,
-            switch_prob=switch_prob,
-            no_trough_prob=no_trough_prob,
-            fill_na=fill_na,
-            center=center,
-            pad_mode=pad_mode
-        )
-
-        # Get the median F0 as a representative value, excluding unvoiced segments
-        f0_median = np.median(f0[voiced_flag])
-
-        return f0_median
-    except Exception as e:
-        # If there is an error, print it and return None
-        print(f"An error occurred: {e}")
-        return None
-
 def calculate_jitter_shimmer(file_path, **kwargs):
     try:
         # Load the WAV file with parselmouth (which uses Praat)
