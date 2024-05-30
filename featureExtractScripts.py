@@ -1,60 +1,218 @@
-import os
 import numpy as np
-import soundfile as sf
+import librosa
+import nolds
+import parselmouth
+from parselmouth.praat import call
 
-def higuchi_fd(signal, kmax=5, norm=True):
-    # Optionally normalize the signal
-    if norm:
-        signal = (signal - np.mean(signal)) / np.std(signal)
+def higuchi_fd(file_path, kmax, norm):
+    """
+    Compute the Higuchi Fractal Dimension (HFD) of a signal.
 
-    # Higuchi's Fractal Dimension calculation
-    N = len(signal)
-    Lmk = np.zeros((kmax, kmax))
-    for k in range(1, kmax + 1):
-        for m in range(1, k + 1):
-            Lmki = 0
-            for i in range(1, int(np.floor((N - m) / k))):
-                Lmki += abs(signal[m + i * k] - signal[m + (i - 1) * k])
-            norm_factor = (N - 1) / (k * int(np.floor((N - m) / k)) * k)
-            Lmk[m - 1, k - 1] = norm_factor * Lmki
-    Lk = np.sum(Lmk, axis=0) / kmax
-    lnLk = np.log(Lk)
-    lnk = np.log(1.0 / np.arange(1, kmax + 1))
-    HFD = -np.polyfit(lnk, lnLk, 1)[0]
-    return HFD
+    Parameters:
+    file_path (str): Path to the input audio file.
+    kmax (int): Maximum k value for the HFD calculation.
+    norm (bool): If True, normalize the signal.
 
-def extractHFD(file_path, kmax=5, norm=True):
-    log_file="./logs/extractHFD.log"
+    Returns:
+    float: Higuchi Fractal Dimension of the signal, or None if an error occurs.
+    """
+    try:
+        # Load the audio file
+        signal, _ = librosa.load(file_path, sr=None)
 
-    # Read the audio file
-    signal, sample_rate = sf.read(file_path)
+        # Ensure the audio is mono
+        if signal.ndim > 1:
+            signal = librosa.to_mono(signal)
 
-    # Extract HFD with provided parameters
-    hfd_feature = higuchi_fd(signal, kmax, norm)
+        # Optionally normalize the signal
+        if norm:
+            signal = (signal - np.mean(signal)) / np.std(signal)
 
-    # Log relevant details
-    with open(log_file, 'a') as log:
-        log.write(f"File: {os.path.basename(file_path)}\n")
-        log.write(f"HFD Value: {hfd_feature}\n")
-        log.write(f"Parameters: kmax={kmax}, norm={norm}\n\n")
+        N = len(signal)
+        if kmax >= N:
+            print(f"Error: kmax ({kmax}) must be smaller than the length of the signal ({N}).")
+            return None
 
-    # Define output directory
-    output_dir = os.path.join('speechFeatures', 'hfd_features')
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+        Lmk = np.zeros((kmax, kmax))
+        for k in range(1, kmax + 1):
+            for m in range(1, k + 1):
+                Lmki = 0
+                for i in range(1, int(np.floor((N - m) / k))):
+                    Lmki += abs(signal[m + i * k] - signal[m + (i - 1) * k])
+                norm_factor = (N - 1) / (k * int(np.floor((N - m) / k)) * k)
+                Lmk[m - 1, k - 1] = norm_factor * Lmki
 
-    # Save feature as numpy array
-    base_name = os.path.splitext(os.path.basename(file_path))[0]
-    np.save(os.path.join(output_dir, base_name), hfd_feature)
+        Lk = np.sum(Lmk, axis=0) / kmax
 
-if __name__ == "__main__":
-    import sys
+        # Remove zero or negative values before taking the log
+        Lk = Lk[Lk > 0]
+        if len(Lk) == 0:
+            print("Error: All Lk values are non-positive, cannot compute logarithm.")
+            return None
 
-    if len(sys.argv) != 2:
-        print("Usage: python extract_hfd.py <file_path>")
-        sys.exit(1)
+        lnLk = np.log(Lk)
+        lnk = np.log(1.0 / np.arange(1, len(Lk) + 1))
+
+        if len(lnk) < 2:
+            print("Error: Not enough valid points for polyfit.")
+            return None
+
+        try:
+            HFD = -np.polyfit(lnk, lnLk, 1)[0]
+        except np.linalg.LinAlgError as e:
+            print(f"Polyfit error: {e}")
+            return None
+
+        return HFD
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+def calculate_dfa2(audio_file_path, **kwargs):
+    """
+    Calculate the DFA2 value of an audio file.
     
-    file_path = sys.argv[1]
+    Parameters:
+    - audio_file_path: str, path to the audio file
+    - nvals: list of int, window sizes for DFA (default is calculated internally by nolds)
+    - overlap: bool, whether to use overlapping windows (default is True)
+    - order: int, order of polynomial for detrending (default is 1)
+    - fit_trend: str, method to fit the trend ('poly' or other options in nolds)
+    - fit_exp: str, method to fit the exponent ('RANSAC' or other options in nolds)
+    - debug_plot: bool, whether to plot debug information (default is False)
+    - debug_data: bool, whether to return debug data (default is False)
+    - plot_file: str, file to save debug plot (default is None)
     
-    extractHFD(file_path)
-    print(f"Finished processing file: {file_path}")
+    Returns:
+    - DFA2 value if successful, None if there is an error
+    """
+    # Default parameters
+    params = {
+        "nvals": None,
+        "overlap": True,
+        "order": 1,
+        "fit_trend": 'poly',
+        "fit_exp": 'RANSAC',
+        "debug_plot": False,
+        "debug_data": False,
+        "plot_file": None
+    }
+    
+    # Update default parameters with any provided keyword arguments
+    params.update(kwargs)
+    
+    try:
+        # Load audio file
+        y, sr = librosa.load(audio_file_path)
+        
+        # Ensure the audio is mono
+        if y.ndim > 1:
+            y = np.mean(y, axis=1)
+        
+        # Calculate DFA2 using nolds
+        dfa2_value = nolds.dfa(
+            y,
+            nvals=params['nvals'],
+            overlap=params['overlap'],
+            order=params['order'],
+            fit_trend=params['fit_trend'],
+            fit_exp=params['fit_exp'],
+            debug_plot=params['debug_plot'],
+            debug_data=params['debug_data'],
+            plot_file=params['plot_file']
+        )
+        
+        print(f"DFA2 value: {dfa2_value}")
+        return dfa2_value
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+import librosa
+import numpy as np
+
+def calculate_f0(audio_file_path, **kwargs):
+    try:
+        # Load the audio file with librosa (sample rate is auto-detected)
+        y, sr = librosa.load(audio_file_path)
+        
+        # Convert note names to frequencies if provided
+        fmin_note = kwargs.get('fmin', 'C2')
+        fmax_note = kwargs.get('fmax', 'C7')
+        fmin = librosa.note_to_hz(fmin_note) if isinstance(fmin_note, str) else fmin_note
+        fmax = librosa.note_to_hz(fmax_note) if isinstance(fmax_note, str) else fmax_note
+        
+        # Extract other keyword arguments for librosa.pyin
+        frame_length = kwargs.get('frame_length', 2048)
+        hop_length = kwargs.get('hop_length', frame_length // 4)  # Default to frame_length // 4 if not provided
+        win_length = kwargs.get('win_length', None)  # None means same as frame_length
+        n_thresholds = kwargs.get('n_thresholds', 100)
+        beta_parameters = kwargs.get('beta_parameters', (2, 18))
+        boltzmann_parameter = kwargs.get('boltzmann_parameter', 2)
+        resolution = kwargs.get('resolution', 0.01)
+        max_transition_rate = kwargs.get('max_transition_rate', 1.0)
+        switch_prob = kwargs.get('switch_prob', 0.01)
+        no_trough_prob = kwargs.get('no_trough_prob', 0.01)
+        fill_na = kwargs.get('fill_na', np.nan)
+        center = kwargs.get('center', True)
+        pad_mode = kwargs.get('pad_mode', 'constant')
+        
+        # Calculate the F0 using librosa's pitch detection method
+        f0, voiced_flag, voiced_probs = librosa.pyin(
+            y, 
+            fmin=fmin, 
+            fmax=fmax, 
+            sr=sr,
+            frame_length=frame_length, 
+            hop_length=hop_length, 
+            win_length=win_length, 
+            n_thresholds=n_thresholds,
+            beta_parameters=beta_parameters,
+            boltzmann_parameter=boltzmann_parameter,
+            resolution=resolution,
+            max_transition_rate=max_transition_rate,
+            switch_prob=switch_prob,
+            no_trough_prob=no_trough_prob,
+            fill_na=fill_na,
+            center=center,
+            pad_mode=pad_mode
+        )
+
+        # Get the median F0 as a representative value, excluding unvoiced segments
+        f0_median = np.median(f0[voiced_flag])
+
+        return f0_median
+    except Exception as e:
+        # If there is an error, print it and return None
+        print(f"An error occurred: {e}")
+        return None
+
+def calculate_jitter_shimmer(file_path, **kwargs):
+    try:
+        # Load the WAV file with parselmouth (which uses Praat)
+        snd = parselmouth.Sound(file_path)
+        
+        # Apply pre-emphasis if specified
+        preemphasis = kwargs.get('preemphasis', None)
+        if preemphasis is not None:
+            snd = snd.copy()
+            snd.pre_emphasis(filter_frequency=preemphasis)
+        
+        # Calculate jitter
+        point_process = call(snd, "To PointProcess (periodic, cc)", 75, 500)
+        jitter_local = call(point_process, "Get jitter (local)", 0, 0.02, 1.3, 1.6)
+        
+        # Calculate shimmer
+        shimmer_local = call([snd, point_process], "Get shimmer (local)", 0, 0.02, 1.3, 1.6, 1.3)
+        
+        # Create an array with jitter and shimmer values
+        result_array = np.array([jitter_local, shimmer_local])
+        
+        return result_array
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None

@@ -24,16 +24,35 @@ I am currently working on further clean up scripts:
 - [ ] Delete lines from lookup.csv that do not appear as audio files.
 - [ ] Noise reduce audio
 - [ ] Identify numerical data types to extract from audio files (speech features)
-    - [ ] Create modular script for this:
+    - [x] Create modular script for this:
        - [x] Iterate through folder
        - [x] Extract metric
        - [x] Save to appropriate folder as .npy array file.
-       - [ ] I think there's further scope to modularise this, for example: Can we just write a script that will process the audio and send back signal and sample rate. If this is used multiple times this will be more slick.
+
    - [ ] Potential extractions:
-       - [ ] DFA2
+       - [x] DFA2
        - [x] HFD
        - [ ] Other fractals
        - [ ] MFCC with varying parameters
+- [ ] Further Extractions
+    - [ ] F0 median (in progress)
+        - Can we do more with the arrays from F0?
+        - Function currently either not working, or taking ages
+    - [ ] Jitter and shimmer (in progress)
+        - Error in function needs to be fixed.
+    - [ ] Spectral Features
+        - Method: Extract features like spectral centroid, spectral bandwidth, spectral contrast, and spectral flatness using Fourier transform.
+    - [ ] Non-linear Dynamics
+        - Method: Extract features such as correlation dimension, Lyapunov exponents, and entropy measures which capture the complexity of the signal.
+        - Tools: TISEAN (a software package for nonlinear time series analysis).
+    - [ ] Prosodic Features
+        - Method: Analyze speech rate, rhythm, and intonation patterns.
+        - Tools: OpenSMILE, Praat.
+    - [ ] Glottal Flow Features
+        - Method: Extract glottal flow parameters using inverse filtering techniques.
+        - Tools: GLOTTAL-Flow, Praat.
+    - [ ] Entropy Measures
+        - Method: Compute measures like spectral entropy and Shannon entropy to quantify the randomness in the signal
 - [ ] Create script to compile ground truth data with speech features
    - [ ] Compile data from .npy or .csv speech feature files
    - [ ] Save compiled data to a cache as a .csv

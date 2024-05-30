@@ -13,6 +13,9 @@ lookup.csv
 # Ignore virtual environments
 venv/
 
+# Ignore logs directory
+logs/
+
 # Ignore macOS system files
 .DS_Store
 
