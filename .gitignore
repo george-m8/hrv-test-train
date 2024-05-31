@@ -6,6 +6,7 @@ hrv-audio-recs/
 
 # Ignore extract speech features folder
 speechFeatures/
+cached_features/
 
 # Ignore lookup.csv file
 lookup.csv
