@@ -2,7 +2,7 @@ import numpy as np
 import librosa
 import nolds
 
-from extract_praat_data import extract_praat_data, get_frequencies_per_frame, get_max_frequencies_per_frame
+from extract_praat_data import extract_praat_data, get_frequencies_per_frame
 
 def higuchi_fd(file_path, kmax, norm):
     """
@@ -126,37 +126,6 @@ def calculate_dfa2(audio_file_path, **kwargs):
         
         print(f"DFA2 value: {dfa2_value}")
         return dfa2_value
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-
-
-import librosa
-import numpy as np
-
-def calculate_jitter_shimmer(file_path, **kwargs):
-    try:
-        # Load the WAV file with parselmouth (which uses Praat)
-        snd = parselmouth.Sound(file_path)
-        
-        # Apply pre-emphasis if specified
-        preemphasis = kwargs.get('preemphasis', None)
-        if preemphasis is not None:
-            snd = snd.copy()
-            snd.pre_emphasis(filter_frequency=preemphasis)
-        
-        # Calculate jitter
-        point_process = call(snd, "To PointProcess (periodic, cc)", 75, 500)
-        jitter_local = call(point_process, "Get jitter (local)", 0, 0.02, 1.3, 1.6)
-        
-        # Calculate shimmer
-        shimmer_local = call([snd, point_process], "Get shimmer (local)", 0, 0.02, 1.3, 1.6, 1.3)
-        
-        # Create an array with jitter and shimmer values
-        result_array = np.array([jitter_local, shimmer_local])
-        
-        return result_array
-    
     except Exception as e:
         print(f"An error occurred: {e}")
         return None

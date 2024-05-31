@@ -2,7 +2,7 @@ import os
 import sys
 import numpy as np
 
-from featureExtractScripts import higuchi_fd, calculate_dfa2, get_f0_values, get_max_f0_values, calculate_jitter_shimmer
+from featureExtractScripts import higuchi_fd, calculate_dfa2, get_f0_values, calculate_jitter_shimmer
 from fileSaveScripts import save_numpy_file, file_exists
 
 def save_file(data, file_name, *args):
@@ -60,9 +60,6 @@ def main(directory,log_file):
                     if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, "default"):
                         extractedFeature = np.concatenate(get_f0_values(file_path))
                         save_file(extractedFeature, file_name, "speechFeatures", feature_name, "all_f0_values", "default")
-
-                        extractedFeature = get_max_f0_values(file_path)
-                        save_file(extractedFeature, file_name, "speechFeatures", feature_name, "max_f0_values_per_frame", "default")
 
                 if extract_jitter_shimmer:
                     feature_name = "jitter_shimmer"

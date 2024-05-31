@@ -1,0 +1,17 @@
+model_name,model_params,feature_name,r2_score,mse,correlation
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=3_norm=False,-0.0003528537974546442,704.1459729411793,0.10903301336048406
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=5_norm=False,-0.0002101325691699074,704.0455118111205,0.10780911099589695
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=2_norm=False,0.007200746007871128,698.8290121668499,0.14173133643432567
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=7_norm=False,0.00284190476668178,701.8971900553041,0.12630342835514044
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=5_norm=True,-0.0002101325430496903,704.0455117927345,0.10780911113054016
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",f0_all_f0_values_default,-4.2396868934085425e+21,2.9843054290217286e+24,-0.058366307948274375
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=2_norm=True,0.007200746064791708,698.8290121267836,0.14173133671834526
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=10_norm=True,0.002166640731952163,702.3725067887166,0.127101003844124
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=7_norm=True,0.0028419047663976738,701.897190055504,0.12630342850905563
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=3_norm=True,-0.0003528537494830175,704.1459729074121,0.1090330136400352
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",higuchi_fd_kmax=10_norm=False,0.0021666407633568197,702.3725067666109,0.12710100381006476
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",dfa2_overlap=True_order=1,0.033133602467111056,680.5749367440465,0.19696118668074664
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",dfa2_overlap=True_order=2,0.06880542210861673,655.4656285107577,0.29622454265629916
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",dfa2_overlap=False_order=2,0.04904746427732354,669.3732076091062,0.25352449530928506
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",dfa2_overlap=False_order=1,0.05891271994063829,662.4290778243126,0.2688206073734643
+LinearRegression,"{'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'positive': False}",f0_max_f0_values_per_frame_default,-0.562166785017707,2397.192753041866,-0.1510419893773947

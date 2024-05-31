@@ -18,6 +18,7 @@ logs/
 
 # Ignore example data
 praat_example.json
+test_csvs/
 
 # Ignore macOS system files
 .DS_Store

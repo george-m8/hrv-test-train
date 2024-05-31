@@ -37,6 +37,22 @@ def save_numpy_file(data, file_name, *args):
     
     print(f"File saved to {file_path}")
 
+def save_dataframe_to_csv(df, file_path):
+    # Ensure the path is relative to the current working directory
+    if file_path.startswith('/'):
+        file_path = '.' + file_path
+    
+    directory = os.path.dirname(file_path)
+
+    # Check if the directory exists and create it if it doesn't
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Save the DataFrame to a CSV file
+    df.to_csv(file_path, index=False)
+    
+    return file_path
+
 # Example usage
 if __name__ == "__main__":
     # Example numpy data
