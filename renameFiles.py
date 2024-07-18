@@ -5,8 +5,10 @@ import sys
 # Removes hyphens from files and appends iterated numbers within brackets to the end of the file if the name already exists.
 
 def clean_filename(filename):
-    """Removes hyphens from the filename."""
-    return filename.replace('-', '')
+    """Removes everything to the right of and including the first hyphen, keeping the file extension if present."""
+    name, extension = os.path.splitext(filename)
+    cleaned_name = name.split('-', 1)[0]
+    return cleaned_name + extension
 
 def remove_bracketed_number(filename):
     """Removes the bracketed number from the filename."""

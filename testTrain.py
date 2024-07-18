@@ -3,10 +3,38 @@ import sys
 import csv
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import r2_score, mean_squared_error
 import numpy as np
 
+models = {
+    'LinearRegression': {
+        'model': LinearRegression(),
+        'params': {}
+    },
+    'Ridge': {
+        'model': Ridge(),
+        'params': {'alpha': [0.1, 1.0, 10.0]}
+    },
+    'Lasso': {
+        'model': Pipeline([
+            ('scaler', StandardScaler()),
+            ('lasso', Lasso())
+        ]),
+        'params': {
+            'lasso__alpha': [0.1, 1.0, 10.0],
+            'lasso__max_iter': [1000, 5000, 10000]
+        }
+    },
+    'RandomForest': {
+        'model': RandomForestRegressor(),
+        'params': {'n_estimators': [10, 50, 100]}
+    }
+}
 # Function to list CSV files in a directory
 def list_csv_files(directory):
     return [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith('.csv')]
@@ -17,11 +45,10 @@ def split_data(df, test_size=0.2, random_state=42):
     y = df.iloc[:, 0]   # target
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-# Function to train a regression model
-def train_model(X_train, y_train):
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-    return model
+def train_model(X_train, y_train, model, params):
+    grid_search = GridSearchCV(estimator=model, param_grid=params, cv=5, scoring='neg_mean_squared_error')
+    grid_search.fit(X_train, y_train)
+    return grid_search.best_estimator_
 
 def evaluate_model(model, X_test, y_test, model_name, feature_name):
     y_pred = model.predict(X_test)
@@ -40,10 +67,12 @@ def evaluate_model(model, X_test, y_test, model_name, feature_name):
         "feature_name": feature_name,
         "r2_score": r2,
         "mse": mse,
-        "correlation": correlation
+        "correlation": correlation,
+        "y_test": y_test,
+        "y_pred": y_pred
     }
 
-def append_results_to_csv(results, output_file):
+def append_results_to_csv(result, output_file):
     file_exists = os.path.isfile(output_file)
 
     with open(output_file, mode='a', newline='') as file:
@@ -52,15 +81,35 @@ def append_results_to_csv(results, output_file):
         if not file_exists:
             writer.writeheader()
         
-        for result in results:
-            writer.writerow({
-                "model_name": result["model_name"],
-                "model_params": result["model_params"],
-                "feature_name": result["feature_name"],
-                "r2_score": result["r2_score"],
-                "mse": result["mse"],
-                "correlation": result["correlation"]
-            })
+        writer.writerow({
+            "model_name": result["model_name"],
+            "model_params": result["model_params"],
+            "feature_name": result["feature_name"],
+            "r2_score": result["r2_score"],
+            "mse": result["mse"],
+            "correlation": result["correlation"]
+        })
+
+def generate_filename(model_name, params, feature_name, output_dir="predictions"):
+    params_str = "_".join([f"{k}={v}" for k, v in params.items()])
+    filename = f"{model_name}_{params_str}_{feature_name}.csv"
+    return os.path.join(output_dir, filename)
+
+def save_predictions_to_csv(y_test, y_pred, model_name, params, feature_name):
+    # Create output directory if it doesn't exist
+    output_dir = "predictions"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    filename = generate_filename(model_name, params, feature_name, output_dir)
+    
+    # Save the predictions to a CSV file
+    predictions_df = pd.DataFrame({'y_test': y_test, 'y_pred': y_pred})
+    predictions_df.to_csv(filename, index=False)
+    print(f"Saved predictions to {filename}")
+
+# Define the list_csv_files function (mock implementation for example)
+def list_csv_files(directory):
+    return [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.csv')]
 
 # Main function to iterate over files, train and evaluate models
 def main(directory):
@@ -76,13 +125,18 @@ def main(directory):
         print(f"Feature name: {feature_name}")
         
         X_train, X_test, y_train, y_test = split_data(df)
-        
-        model = train_model(X_train, y_train)
-        
-        result = evaluate_model(model, X_test, y_test, "LinearRegression", feature_name)
-        results.append(result)
 
-        append_results_to_csv(results, "model_evaluation_results.csv")
+        for model_name, model_info in models.items():
+            print(f"Training {model_name} model...")
+            model = train_model(X_train, y_train, model_info['model'], model_info['params'])
+            
+            result = evaluate_model(model, X_test, y_test, model_name, feature_name)
+            print(result)
+
+            #append_results_to_csv(result, "model_evaluation_results.csv")
+
+            # Save actual vs predicted values
+            save_predictions_to_csv(result["y_test"], result["y_pred"], model_name, model_info['params'], feature_name)
     
     return results
 
@@ -95,5 +149,5 @@ if __name__ == "__main__":
         directory = sys.argv[1]
         results = main(directory)
         # Optionally, you can save results to a CSV file or further process them
-        results_df = pd.DataFrame(results)
-        results_df.to_csv("model_evaluation_results.csv", index=False)
+        #results_df = pd.DataFrame(results)
+        #results_df.to_csv("model_evaluation_results.csv", index=False)

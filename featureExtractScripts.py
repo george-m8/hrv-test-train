@@ -1,6 +1,7 @@
 import numpy as np
 import librosa
 import nolds
+import tempfile
 
 from extract_praat_data import extract_praat_data, get_frequencies_per_frame
 
@@ -110,6 +111,14 @@ def calculate_dfa2(audio_file_path, **kwargs):
         # Ensure the audio is mono
         if y.ndim > 1:
             y = np.mean(y, axis=1)
+
+        # If debug_plot is enabled and no plot_file is provided, create a temporary file
+        temp_file_path = None
+        if params['debug_plot'] and params['plot_file'] is None:
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+            params['plot_file'] = temp_file.name
+            temp_file_path = temp_file.name
+            temp_file.close()
         
         # Calculate DFA2 using nolds
         dfa2_value = nolds.dfa(
@@ -125,10 +134,13 @@ def calculate_dfa2(audio_file_path, **kwargs):
         )
         
         print(f"DFA2 value: {dfa2_value}")
-        return dfa2_value
+
+
+        return dfa2_value, temp_file_path
+    
     except Exception as e:
         print(f"An error occurred: {e}")
-        return None
+        return None, None
     
 def get_f0_values(file_path):
     try:

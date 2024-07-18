@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import shutil
 
 def file_exists(file_name, extension, *args):
     # Construct the directory path
@@ -52,6 +53,32 @@ def save_dataframe_to_csv(df, file_path):
     df.to_csv(file_path, index=False)
     
     return file_path
+
+def save_temp_file(temp_file_path, desired_name, *args):
+    """
+    Move a temporary file to a specified directory structure with a new name.
+
+    Parameters:
+    - temp_file_path: str, path to the temporary file
+    - desired_name: str, desired name of the file (without extension)
+    - *args: additional arguments representing directory structure
+    """
+    # Extract the file extension from the temp file
+    _, file_extension = os.path.splitext(temp_file_path)
+    
+    # Construct the directory path
+    directory_path = os.path.join(".", *args)
+    
+    # Ensure the directory exists
+    os.makedirs(directory_path, exist_ok=True)
+    
+    # Construct the full file path with the desired name and original extension
+    file_path = os.path.join(directory_path, f"{desired_name}{file_extension}")
+    
+    # Move the temporary file to the new location with the new name
+    shutil.move(temp_file_path, file_path)
+    
+    print(f"File moved to {file_path}")
 
 # Example usage
 if __name__ == "__main__":

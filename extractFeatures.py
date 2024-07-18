@@ -2,8 +2,8 @@ import os
 import sys
 import numpy as np
 
-from featureExtractScripts import higuchi_fd, calculate_dfa2, get_f0_values, calculate_jitter_shimmer
-from fileSaveScripts import save_numpy_file, file_exists
+from featureExtractScripts import higuchi_fd, calculate_dfa2, get_f0_values
+from fileSaveScripts import save_numpy_file, file_exists, save_temp_file
 
 def save_file(data, file_name, *args):
     with open(log_file, 'a') as log:
@@ -32,7 +32,6 @@ def main(directory,log_file):
                 extract_hfd = True
                 extract_dfa2 = True
                 extract_f0 = True
-                extract_jitter_shimmer = False # Broken
                 
                 if extract_hfd:
                     feature_name = "higuchi_fd"
@@ -46,26 +45,28 @@ def main(directory,log_file):
 
                 if extract_dfa2:
                     feature_name = "dfa2"
+                    nvals=[256, 512, 1024, 2048, 4096, 8192, 16384, 32768]
                     overlap_values = [True, False]
-                    order_values = [1, 2]
+                    order_values = [1]
+                    fit_trend_values = ['poly']
+                    fit_exp_values = ['RANSAC']
+                    debug_plot_value = False
 
                     for overlap in overlap_values:
                         for order in order_values:
-                            if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, f"overlap={overlap}", f"order={order}"):
-                                extractedFeature = calculate_dfa2(file_path, overlap=overlap, order=order)
-                                save_file(extractedFeature, file_name, "speechFeatures", feature_name, f"overlap={overlap}", f"order={order}")
-                    
+                            for fit_trend in fit_trend_values:
+                                for fit_exp in fit_exp_values:
+                                    if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, f"overlap={overlap}", f"order={order}", f"nvals={nvals}", f"fit_trend={fit_trend}", f"fit_exp={fit_exp}"):
+                                        extractedFeature, temp_file = calculate_dfa2(file_path, overlap=overlap, order=order, fit_trend=fit_trend, fit_exp=fit_exp, nvals=nvals, debug_plot=debug_plot_value)
+                                        save_file(extractedFeature, file_name, "speechFeatures", feature_name, f"overlap={overlap}", f"order={order}", f"nvals={nvals}", f"fit_trend={fit_trend}", f"fit_exp={fit_exp}")
+                                        if temp_file is not None:
+                                            save_temp_file(temp_file, file_name, "debug", feature_name, f"overlap={overlap}", f"order={order}", f"nvals={nvals}", f"fit_trend={fit_trend}", f"fit_exp={fit_exp}")
+                        
                 if extract_f0:
                     feature_name = "f0"
                     if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, "default"):
                         extractedFeature = np.concatenate(get_f0_values(file_path))
                         save_file(extractedFeature, file_name, "speechFeatures", feature_name, "all_f0_values", "default")
-
-                if extract_jitter_shimmer:
-                    feature_name = "jitter_shimmer"
-                    if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, "default"):
-                        extractedFeature = calculate_jitter_shimmer(file_path)
-                        save_file(extractedFeature, file_name, "speechFeatures", feature_name, "default")
                 
 
         log.write(f"Feature extraction script completed.\n\n")

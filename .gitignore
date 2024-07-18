@@ -8,6 +8,12 @@ hrv-audio-recs/
 speechFeatures/
 cached_features/
 
+#ignore debug folders
+debug/
+predictions/
+praat_example
+praat_test_output.json
+
 # Ignore lookup.csv file
 lookup.csv
 
