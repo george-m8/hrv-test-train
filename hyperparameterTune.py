@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.metrics import r2_score, mean_squared_error
 import numpy as np
 import optuna
@@ -15,12 +15,21 @@ import optuna
 def list_csv_files(directory):
     return [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith('.csv')]
 
-# Function to split data into train and test sets
+# Function to split data into train and test sets, now with feature engineering
 def split_data(df, test_size=0.2, random_state=42):
     X = df.iloc[:, 1:]  # features
     y = df.iloc[:, 0]   # target
-    return train_test_split(X, y, test_size=test_size, random_state=random_state)
+    
+    # Apply feature engineering (Polynomial and Interaction features)
+    poly = PolynomialFeatures(degree=2, include_bias=False)
+    X_poly = poly.fit_transform(X)
+    
+    scaler = StandardScaler()
+    X_poly_scaled = scaler.fit_transform(X_poly)
+    
+    return train_test_split(X_poly_scaled, y, test_size=test_size, random_state=random_state)
 
+# Objective function for Optuna
 def objective(trial, X_train, y_train):
     n_estimators = trial.suggest_int('n_estimators', 10, 200)
     max_depth = trial.suggest_int('max_depth', 2, 32)

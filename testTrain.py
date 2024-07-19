@@ -133,7 +133,7 @@ def main(directory):
             result = evaluate_model(model, X_test, y_test, model_name, feature_name)
             print(result)
 
-            #append_results_to_csv(result, "model_evaluation_results.csv")
+            append_results_to_csv(result, "model_evaluation_results.csv")
 
             # Save actual vs predicted values
             save_predictions_to_csv(result["y_test"], result["y_pred"], model_name, model_info['params'], feature_name)
