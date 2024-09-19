@@ -34,7 +34,10 @@ def save_numpy_file(data, file_name, *args):
     file_path = os.path.join(directory_path, f"{file_name}.npy")
     
     # Save the numpy array to the file
-    np.save(file_path, data)
+    try:
+        np.save(file_path, data)
+    except Exception as e:
+        print(f"An error occurred: {e}")
     
     print(f"File saved to {file_path}")
 
@@ -86,4 +89,4 @@ if __name__ == "__main__":
     data = np.array([1, 2, 3, 4, 5])
     
     # Example function call
-    save_numpy_file(data, "3420809148", "hfd", "kmax=5", "norm=true")
+    save_numpy_file(data, "test", "data", "example")

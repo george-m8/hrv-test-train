@@ -2,7 +2,7 @@ import os
 import sys
 import numpy as np
 
-from featureExtractScripts import higuchi_fd, calculate_dfa2, get_f0_values
+from featureExtractScripts import higuchi_fd, calculate_dfa2, get_f0_values, extract_mfcc, extract_tempo
 from fileSaveScripts import save_numpy_file, file_exists, save_temp_file
 
 def save_file(data, file_name, *args):
@@ -29,9 +29,11 @@ def main(directory,log_file):
                 log.write(f"Processing {file_name}\n")
                 file_path = os.path.join(directory, file_name)
 
-                extract_hfd = True
-                extract_dfa2 = True
-                extract_f0 = True
+                extract_hfd = False
+                extract_dfa2 = False
+                extract_f0 = False
+                extract_mfcc_bool = True
+                extract_tempo_bool = True
                 
                 if extract_hfd:
                     feature_name = "higuchi_fd"
@@ -73,6 +75,33 @@ def main(directory,log_file):
                         extractedFeature = np.concatenate(get_f0_values(file_path))
                         save_file(extractedFeature, file_name, "speechFeatures", feature_name, "all_f0_values", "default")
                 
+                if extract_mfcc_bool:
+                    feature_name = "mfcc"
+                    n_mfcc_vals = [12, 13, 20]
+                    n_fft_vals = [1000, 2000, 4000]
+                    hop_length_div_vals = [2, 3, 4] # Hop length is n_fft / hop_length_div
+                    n_mels_vals = [40, 80, 128]
+                    fmin_vals = 0
+                    fmax_vals = [None, 4000, 8000]
+                    sample_rate = 16000 
+                    for n_mfcc in n_mfcc_vals:
+                        for n_fft in n_fft_vals:
+                            for hop_length_div in hop_length_div_vals:
+                                for n_mels in n_mels_vals:
+                                    for fmax in fmax_vals:
+                                        if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, f"n_mfcc={n_mfcc}", f"n_fft={n_fft}", f"hop_length_div={hop_length_div}", f"n_mels={n_mels}", f"fmax={fmax}"):
+                                            extractedFeature = extract_mfcc(file_path, n_mfcc=n_mfcc, n_fft=n_fft, hop_length_div=hop_length_div, n_mels=n_mels, fmax=fmax, sr=sample_rate)
+                                            if extractedFeature is not None:
+                                                save_file(extractedFeature, file_name, "speechFeatures", feature_name, f"n_mfcc={n_mfcc}", f"n_fft={n_fft}", f"hop_length_div={hop_length_div}", f"n_mels={n_mels}", f"fmax={fmax}")
+
+                if extract_tempo_bool:
+                    feature_name = "tempo"
+                    hop_length_vals = [256, 512, 1024]
+                    for hop_length in hop_length_vals:
+                        if not file_exists(file_name, saved_file_extension, "speechFeatures", feature_name, f"hop_length={hop_length}"):
+                            extractedFeature = extract_tempo(file_path)
+                            if extractedFeature is not None:
+                                save_file(extractedFeature, file_name, "speechFeatures", feature_name, f"hop_length={hop_length}")
 
         log.write(f"Feature extraction script completed.\n\n")
 

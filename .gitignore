@@ -29,9 +29,8 @@ test_csvs/
 
 # Ignore macOS system files
 .DS_Store
-
-# Ignore other system files
 Thumbs.db
+*.~lock.*
 
 # Python specific ignores
 *.pyc

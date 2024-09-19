@@ -152,3 +152,67 @@ def get_f0_values(file_path):
         print(f"An error occurred: {e}")
         return None
 
+def extract_mfcc(file_path, **kwargs):
+    # Define default parameters for MFCC extraction
+    params = {
+        'n_mfcc': 13,
+        'n_fft': 2048,
+        'hop_length_div': 4,
+        'n_mels': 128,
+        'fmin': 0,
+        'fmax': None,
+        'sr': 16000  # This initial sr will be overwritten by librosa.load
+    }
+
+    # Load the audio file
+    y, sr = librosa.load(file_path, sr=None)  # sr=None lets librosa use the native sampling rate
+    print(f"Sample rate: {sr}")
+
+    # Update default parameters with any provided keyword arguments
+    params.update(kwargs)
+
+    # Update the sample rate using librosa's sr variable
+    params['sr'] = sr
+
+    hop_length_val = params['n_fft'] // params['hop_length_div']
+
+    # Extract the Mel spectrogram
+    S = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=params['n_fft'],
+                                       hop_length=hop_length_val, n_mels=params['n_mels'],
+                                       fmin=params['fmin'], fmax=params['fmax'])
+                                       
+    # Extract MFCC features with the specified parameters
+    try:
+        mfcc = librosa.feature.mfcc(S=librosa.power_to_db(S), sr=sr, n_mfcc=params['n_mfcc'])
+        #print(f"MFCC shape: {mfcc.shape}")
+        #print(f"MFCC: {mfcc}")
+        return mfcc
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+def extract_tempo(file_path, **kwargs):
+    
+    # Load audio file
+    y, sr = librosa.load(file_path, sr=None)
+
+    # Define default parameters
+    hop_length = 512
+
+    # Update hop_length with any provided keyword arguments
+    if 'hop_length' in kwargs:
+        hop_length = kwargs['hop_length']
+
+    # Calculate the onset envelope
+    onset_env = librosa.onset.onset_strength(y=y, sr=sr, hop_length=hop_length)
+
+    # Attempt to detect tempo
+    try:
+        tempo, _ = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr, hop_length=hop_length)
+
+        print(f'Estimated tempo: {tempo} beats per minute')
+        return tempo
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None

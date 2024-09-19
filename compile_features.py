@@ -35,7 +35,7 @@ def npy_to_dataframe(directory):
     df = pd.DataFrame(padded_data)
     df.insert(0, 'ID', filenames)
     
-    print(df[:10])
+    #print(df[:10])
     
     return df
 
@@ -93,13 +93,17 @@ def generate_nice_name(path):
 def compile_and_cache_features(path):
         file_extensions = ['.npy', '.csv']
         directories = get_directories_with_files(path, file_extensions)
+        num_directories = len(directories)
         for directory in directories:
             nice_name = generate_nice_name(directory)
+            print(f'Processing {nice_name}...')
+            print(f'{directories.index(directory) + 1}/{num_directories}')
             #df = npy_to_dataframe(directory)
             df = merge_with_lookup(directory, 'lookup.csv')
             df = drop_id_column(df)
             df = drop_empty_hrv_rows(df)
             cache_features(f'./cached_features/{nice_name}.csv', df)
+            print(f'Cached {nice_name} at ./cached_features/{nice_name}.csv')
 
 
 if __name__ == '__main__':
