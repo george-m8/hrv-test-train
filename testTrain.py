@@ -52,6 +52,9 @@ def train_model(X_train, y_train, model, params):
 
 def evaluate_model(model, X_test, y_test, model_name, feature_name):
     y_pred = model.predict(X_test)
+    # Print y_test and y_pred to debug
+    print(f"y_test:{y_test}")
+    print(f"y_pred:{y_pred}")
     r2 = r2_score(y_test, y_pred)
     mse = mean_squared_error(y_test, y_pred)
     correlation = np.corrcoef(y_test, y_pred)[0, 1]
@@ -76,7 +79,7 @@ def append_results_to_csv(result, output_file):
     file_exists = os.path.isfile(output_file)
 
     with open(output_file, mode='a', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=["model_name", "model_params", "feature_name", "r2_score", "mse", "correlation"])
+        writer = csv.DictWriter(file, fieldnames=["model_name", "model_params", "feature_name", "predictions_file", "r2_score", "mse", "correlation"])
         
         if not file_exists:
             writer.writeheader()
@@ -85,6 +88,7 @@ def append_results_to_csv(result, output_file):
             "model_name": result["model_name"],
             "model_params": result["model_params"],
             "feature_name": result["feature_name"],
+            "predictions_file": result["predictions_file"],
             "r2_score": result["r2_score"],
             "mse": result["mse"],
             "correlation": result["correlation"]
@@ -106,6 +110,7 @@ def save_predictions_to_csv(y_test, y_pred, model_name, params, feature_name):
     predictions_df = pd.DataFrame({'y_test': y_test, 'y_pred': y_pred})
     predictions_df.to_csv(filename, index=False)
     print(f"Saved predictions to {filename}")
+    return filename
 
 # Define the list_csv_files function (mock implementation for example)
 def list_csv_files(directory):
@@ -129,15 +134,19 @@ def main(directory):
         for model_name, model_info in models.items():
             print(f"Training {model_name} model...")
             model = train_model(X_train, y_train, model_info['model'], model_info['params'])
-            
+
             result = evaluate_model(model, X_test, y_test, model_name, feature_name)
+            
+            # Save actual vs predicted values
+            predictions_file = save_predictions_to_csv(result["y_test"], result["y_pred"], model_name, model_info['params'], feature_name)
+
+            # Append predictions file to result variable
+            result["predictions_file"] = predictions_file
+
             print(result)
 
             append_results_to_csv(result, "model_evaluation_results.csv")
 
-            # Save actual vs predicted values
-            save_predictions_to_csv(result["y_test"], result["y_pred"], model_name, model_info['params'], feature_name)
-    
     return results
 
 # Example usage

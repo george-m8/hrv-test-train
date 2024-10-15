@@ -7,6 +7,8 @@ hrv-audio-recs/
 # Ignore extract speech features folder
 speechFeatures/
 cached_features/
+mfcc_features/
+*_features/
 
 #ignore debug folders
 debug/

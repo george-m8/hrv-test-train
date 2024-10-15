@@ -27,6 +27,7 @@ def npy_to_dataframe(directory):
             filenames.append(os.path.splitext(file)[0])
             data.append(array_data)
 
+    print(f"Data: {data[:10]}")
     # Determine the maximum length for padding
     max_length = max(len(row) for row in data)
     padded_data = [row + [0] * (max_length - len(row)) for row in data]
@@ -39,9 +40,12 @@ def npy_to_dataframe(directory):
     
     return df
 
-def merge_with_lookup(npy_directory, csv_file):
-    # Create the DataFrame from .npy files
-    df_npy = npy_to_dataframe(npy_directory)
+def merge_with_lookup(input, csv_file):
+    # If directory is not a dataframe, convert it to a dataframe
+    if not isinstance(input, pd.DataFrame):
+        df_npy = npy_to_dataframe(directory)
+    else:
+        df_npy = input
 
     # Read the CSV file
     df_csv = pd.read_csv(csv_file)
@@ -91,19 +95,19 @@ def generate_nice_name(path):
     return nice_name
 
 def compile_and_cache_features(path):
-        file_extensions = ['.npy', '.csv']
-        directories = get_directories_with_files(path, file_extensions)
-        num_directories = len(directories)
-        for directory in directories:
-            nice_name = generate_nice_name(directory)
-            print(f'Processing {nice_name}...')
-            print(f'{directories.index(directory) + 1}/{num_directories}')
-            #df = npy_to_dataframe(directory)
-            df = merge_with_lookup(directory, 'lookup.csv')
-            df = drop_id_column(df)
-            df = drop_empty_hrv_rows(df)
-            cache_features(f'./cached_features/{nice_name}.csv', df)
-            print(f'Cached {nice_name} at ./cached_features/{nice_name}.csv')
+    file_extensions = ['.npy', '.csv']
+    directories = get_directories_with_files(path, file_extensions)
+    num_directories = len(directories)
+    for directory in directories:
+        nice_name = generate_nice_name(directory)
+        print(f'Processing {nice_name}...')
+        print(f'{directories.index(directory) + 1}/{num_directories}')
+        #df = npy_to_dataframe(directory)
+        df = merge_with_lookup(directory, 'lookup.csv')
+        df = drop_id_column(df)
+        df = drop_empty_hrv_rows(df)
+        cache_features(f'./cached_features/{nice_name}.csv', df)
+        print(f'Cached {nice_name} at ./cached_features/{nice_name}.csv')
 
 
 if __name__ == '__main__':
