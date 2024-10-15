@@ -8,6 +8,7 @@ hrv-audio-recs/
 speechFeatures/
 cached_features/
 mfcc_features/
+pca_features/
 *_features/
 
 #ignore debug folders
