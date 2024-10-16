@@ -46,8 +46,8 @@ def main(data, n_components):
     csv_file_path = data
     csv_data = load_csv_data(csv_file_path)
 
-    # Store the csv file name
-    csv_file_name = os.path.basename(csv_file_path)
+    # remove the file extension
+    csv_file_name = os.path.splitext(os.path.basename(csv_file_path))[0]
     
     # Preprocess the data
     exclude_columns = ['HRV (ms)']  # Columns to exclude from PCA
@@ -76,6 +76,8 @@ def main(data, n_components):
     os.makedirs("pca_features", exist_ok=True)
 
     pca_df.to_csv(f"./pca_features/{csv_file_name}_pca_n_components={n_components}.csv", index=False)
+    if debug:
+        print(f"Saved PCA result to ./pca_features/{csv_file_name}_pca_n_components={n_components}.csv")    
     
 if __name__ == "__main__":
     if len(sys.argv) != 2:
