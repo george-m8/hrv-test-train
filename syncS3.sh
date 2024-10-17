@@ -3,6 +3,7 @@
 # Define the S3 bucket and local directory
 BUCKET_NAME="hrv-audio-recs"
 LOCAL_DIRECTORY="./hrv-audio-recs"
+BUCKET_REGION="us-west-2"
 
 # Create the local directory if it doesn't exist
 mkdir -p "$LOCAL_DIRECTORY"
@@ -15,7 +16,7 @@ echo "Number of files: $count"
 python deleteFilesFromDirectory.py $LOCAL_DIRECTORY
 
 # Sync the entire bucket with the local directory
-aws s3 sync s3://$BUCKET_NAME $LOCAL_DIRECTORY
+aws s3 sync s3://$BUCKET_NAME $LOCAL_DIRECTORY --region $BUCKET_REGION
 
 # Count files and print result
 count=$(ls $LOCAL_DIRECTORY | wc -l)
